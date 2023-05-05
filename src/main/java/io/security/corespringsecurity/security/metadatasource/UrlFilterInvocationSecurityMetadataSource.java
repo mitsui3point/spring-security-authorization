@@ -1,11 +1,13 @@
 package io.security.corespringsecurity.security.metadatasource;
 
+import io.security.corespringsecurity.security.factory.UrlResourcesMapFactoryBean;
+import io.security.corespringsecurity.service.SecurityResourceService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -18,14 +20,10 @@ import java.util.*;
  * DB 로부터 자원 및 권한 정보를 매핑하여 맵으로 관리
  * 사용자의 매 요청마다 요청정보에 매핑된 권한 정보 확인
  */
+@RequiredArgsConstructor
 public class UrlFilterInvocationSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
 
     private final LinkedHashMap<RequestMatcher, List<ConfigAttribute>> requestMap;
-
-    public UrlFilterInvocationSecurityMetadataSource() {
-        this.requestMap = new LinkedHashMap<>();
-        requestMap.put(new AntPathRequestMatcher("/mypage"), Arrays.asList(new SecurityConfig("ROLE_USER")));
-    }
 
     @Override
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
