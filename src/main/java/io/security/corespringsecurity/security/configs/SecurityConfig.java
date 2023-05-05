@@ -4,6 +4,7 @@ import io.security.corespringsecurity.security.common.FormWebAuthenticationDetai
 import io.security.corespringsecurity.security.handler.AjaxAuthenticationFailureHandler;
 import io.security.corespringsecurity.security.handler.AjaxAuthenticationSuccessHandler;
 import io.security.corespringsecurity.security.handler.FormAccessDeniedHandler;
+import io.security.corespringsecurity.security.metadatasource.UrlFilterInvocationSecurityMetadataSource;
 import io.security.corespringsecurity.security.provider.AjaxAuthenticationProvider;
 import io.security.corespringsecurity.security.provider.FormAuthenticationProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.annotation.Jsr250MethodSecurityMetadataSource;
 import org.springframework.security.access.annotation.SecuredAnnotationSecurityMetadataSource;
@@ -19,6 +21,10 @@ import org.springframework.security.access.intercept.AbstractSecurityInterceptor
 import org.springframework.security.access.method.MapBasedMethodSecurityMetadataSource;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
 import org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource;
+import org.springframework.security.access.vote.AffirmativeBased;
+import org.springframework.security.access.vote.ConsensusBased;
+import org.springframework.security.access.vote.RoleVoter;
+import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -39,6 +45,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -115,12 +122,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/mypage").hasRole("USER")
-                .antMatchers("/messages").hasRole("MANAGER")
-                .antMatchers("/config").hasRole("ADMIN")
-                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
-                .and()
+        .and()
                 .formLogin()
                 .loginPage("/login")
                 .loginProcessingUrl("/login_proc")
@@ -134,8 +137,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 .accessDeniedPage("/denied")
                 .accessDeniedHandler(accessDeniedHandler())
-//        .and()
-//                .addFilterBefore(customFilterSecurityInterceptor(), FilterSecurityInterceptor.class)
+        .and()
+                .addFilterBefore(customFilterSecurityInterceptor(), FilterSecurityInterceptor.class)
         ;
 
         http.csrf().disable();
@@ -181,5 +184,53 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         FormAccessDeniedHandler commonAccessDeniedHandler = new FormAccessDeniedHandler();
         commonAccessDeniedHandler.setErrorPage("/denied");
         return commonAccessDeniedHandler;
+    }
+
+    /**
+     * 현재 추가한 customFilterSecurityInterceptor() 안에 설정된
+     *      {@link UrlFilterInvocationSecurityMetadataSource} 이
+     * 이전에 추가된 {@link FilterSecurityInterceptor}
+     *      {@link ExpressionBasedFilterInvocationSecurityMetadataSource} 보다 먼저 인가처리를 진행해버렸기 때문에
+     * {@link FilterSecurityInterceptor#invoke(FilterInvocation)}
+     *      => fi.getChain().doFilter(fi.getRequest(), fi.getResponse());
+     *      코드를 호출하여 다음 필터를 바로 호출해버려서 아래 라인의 코드를 진행하지 않는다.
+     *
+     * 그래서 기존
+     * .antMatchers("/mypage").hasRole("USER")
+     * .antMatchers("/messages").hasRole("MANAGER")
+     * .antMatchers("/config").hasRole("ADMIN")
+     * 추가사항은 적용되지 않는다.
+     */
+    @Bean
+    public FilterSecurityInterceptor customFilterSecurityInterceptor() throws Exception {
+        FilterSecurityInterceptor interceptor = new FilterSecurityInterceptor();
+        interceptor.setSecurityMetadataSource(urlFilterInvocationSecurityMetadataSource());
+        interceptor.setAuthenticationManager(authenticationManagerBean());//인증관리자; 인가 전 인증객체를 갖고 있는 사용자인지 확인
+        interceptor.setAccessDecisionManager(affirmativeBased());//인가승인을 할것인지 결정하는 Manager(Voter 들의 승인을 취합하여 결정)
+        return interceptor;
+    }
+
+    /**
+     * {@link AffirmativeBased} {@link AccessDecisionVoter} 들 중 한개의 Voter라도 승인을 하게되면 이 클래스가 인가승인처리를 한다.
+     * {@link ConsensusBased} {@link AccessDecisionVoter} 들 중 과반수 이상의 Voter가 승인을 하게되면 이 클래스가 인가승인처리를 한다.
+     * {@link UnanimousBased} {@link AccessDecisionVoter} Voter 모두가 승인을 해야 이 클래스가 인가승인처리를 한다.
+     * 보편적으로 {@link AffirmativeBased} 를 사용한다.
+     */
+    @Bean
+    public AccessDecisionManager affirmativeBased() {
+        return new AffirmativeBased(getDecisionVoter());
+    }
+
+    /**
+     * 여러가지 voter 가 존재하지만, {@link RoleVoter} 만 사용한다.
+     * @return
+     */
+    private List<AccessDecisionVoter<?>> getDecisionVoter() {
+        return Arrays.asList(new RoleVoter());
+    }
+
+    @Bean
+    public FilterInvocationSecurityMetadataSource urlFilterInvocationSecurityMetadataSource() {
+        return new UrlFilterInvocationSecurityMetadataSource();
     }
 }
