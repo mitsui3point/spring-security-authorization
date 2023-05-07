@@ -1,14 +1,11 @@
 package io.security.corespringsecurity.security.metadatasource;
 
 import io.security.corespringsecurity.security.factory.UrlResourcesMapFactoryBean;
-import io.security.corespringsecurity.service.SecurityResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,17 +20,21 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UrlFilterInvocationSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
 
-    private final LinkedHashMap<RequestMatcher, List<ConfigAttribute>> requestMap;
+    private final UrlResourcesMapFactoryBean urlResourcesMapFactoryBean;
+
+    private LinkedHashMap<RequestMatcher, List<ConfigAttribute>> getConfigAttributes() {
+        try {
+            return urlResourcesMapFactoryBean.getObject();
+        } catch (Exception e) {
+            throw new RuntimeException("User Authorizations not found", e);
+        }
+    }
 
     @Override
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
         HttpServletRequest request = ((FilterInvocation) object).getRequest();
 
-        if (requestMap.isEmpty()) {
-            return null;
-        }
-
-        for (Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : requestMap.entrySet()) {
+        for (Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : getConfigAttributes().entrySet()) {
             if (entry.getKey().matches(request)) {
                 return entry.getValue();
             }
@@ -45,8 +46,7 @@ public class UrlFilterInvocationSecurityMetadataSource implements FilterInvocati
     public Collection<ConfigAttribute> getAllConfigAttributes() {
         Set<ConfigAttribute> allAttributes = new HashSet<>();
 
-        for (Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : requestMap
-                .entrySet()) {
+        for (Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : getConfigAttributes().entrySet()) {
             allAttributes.addAll(entry.getValue());
         }
 
