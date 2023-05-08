@@ -1,6 +1,6 @@
 package io.security.corespringsecurity.security.metadatasource;
 
-import io.security.corespringsecurity.security.factory.UrlResourcesMapFactoryBean;
+import io.security.corespringsecurity.service.SecurityResourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.ConfigAttribute;
@@ -20,19 +20,15 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UrlFilterInvocationSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
 
-    private final UrlResourcesMapFactoryBean urlResourcesMapFactoryBean;
-
-    private LinkedHashMap<RequestMatcher, List<ConfigAttribute>> getConfigAttributes() {
-        try {
-            return urlResourcesMapFactoryBean.getObject();
-        } catch (Exception e) {
-            throw new RuntimeException("User Authorizations not found", e);
-        }
-    }
+    private final SecurityResourceService securityResourceService;
 
     @Override
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
         HttpServletRequest request = ((FilterInvocation) object).getRequest();
+
+        if (isWebStaticResources(request.getRequestURI())) {
+            return null;
+        }
 
         for (Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : getConfigAttributes().entrySet()) {
             if (entry.getKey().matches(request)) {
@@ -56,5 +52,19 @@ public class UrlFilterInvocationSecurityMetadataSource implements FilterInvocati
     @Override
     public boolean supports(Class<?> clazz) {
         return FilterInvocation.class.isAssignableFrom(clazz);
+    }
+
+    private LinkedHashMap<RequestMatcher, List<ConfigAttribute>> getConfigAttributes() {
+        try {
+            return securityResourceService.getResourceList();
+        } catch (Exception e) {
+            throw new RuntimeException("User Authorizations not found", e);
+        }
+    }
+
+    private boolean isWebStaticResources(String uri) {
+        return uri.startsWith("/css") ||
+                uri.startsWith("/images") ||
+                uri.startsWith("/js");
     }
 }

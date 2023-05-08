@@ -1,7 +1,6 @@
 package io.security.corespringsecurity.security.configs;
 
 import io.security.corespringsecurity.security.common.FormWebAuthenticationDetailsSource;
-import io.security.corespringsecurity.security.factory.UrlResourcesMapFactoryBean;
 import io.security.corespringsecurity.security.handler.AjaxAuthenticationFailureHandler;
 import io.security.corespringsecurity.security.handler.AjaxAuthenticationSuccessHandler;
 import io.security.corespringsecurity.security.handler.FormAccessDeniedHandler;
@@ -105,7 +104,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+        //web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
     @Override
@@ -123,6 +122,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                .antMatchers("/static/**").permitAll()
                 .anyRequest().authenticated()
         .and()
                 .formLogin()
@@ -232,11 +232,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public FilterInvocationSecurityMetadataSource urlFilterInvocationSecurityMetadataSource() throws Exception {
-        return new UrlFilterInvocationSecurityMetadataSource(urlResourcesMapFactoryBean());
-    }
-
-    @Bean
-    public UrlResourcesMapFactoryBean urlResourcesMapFactoryBean() {
-        return new UrlResourcesMapFactoryBean(securityResourceService);
+        return new UrlFilterInvocationSecurityMetadataSource(securityResourceService);
     }
 }
