@@ -26,10 +26,6 @@ public class UrlFilterInvocationSecurityMetadataSource implements FilterInvocati
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
         HttpServletRequest request = ((FilterInvocation) object).getRequest();
 
-        if (isWebStaticResources(request.getRequestURI())) {
-            return null;
-        }
-
         for (Map.Entry<RequestMatcher, List<ConfigAttribute>> entry : getConfigAttributes().entrySet()) {
             if (entry.getKey().matches(request)) {
                 return entry.getValue();
@@ -60,11 +56,5 @@ public class UrlFilterInvocationSecurityMetadataSource implements FilterInvocati
         } catch (Exception e) {
             throw new RuntimeException("User Authorizations not found", e);
         }
-    }
-
-    private boolean isWebStaticResources(String uri) {
-        return uri.startsWith("/css") ||
-                uri.startsWith("/images") ||
-                uri.startsWith("/js");
     }
 }

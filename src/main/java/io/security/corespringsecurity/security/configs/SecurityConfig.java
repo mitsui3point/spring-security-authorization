@@ -1,6 +1,7 @@
 package io.security.corespringsecurity.security.configs;
 
 import io.security.corespringsecurity.security.common.FormWebAuthenticationDetailsSource;
+import io.security.corespringsecurity.security.filter.PermitAllFilter;
 import io.security.corespringsecurity.security.handler.AjaxAuthenticationFailureHandler;
 import io.security.corespringsecurity.security.handler.AjaxAuthenticationSuccessHandler;
 import io.security.corespringsecurity.security.handler.FormAccessDeniedHandler;
@@ -10,7 +11,6 @@ import io.security.corespringsecurity.security.provider.FormAuthenticationProvid
 import io.security.corespringsecurity.service.SecurityResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
@@ -122,7 +122,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/static/**").permitAll()
+                //.antMatchers("/static/**").permitAll()
                 .anyRequest().authenticated()
         .and()
                 .formLogin()
@@ -204,7 +204,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public FilterSecurityInterceptor customFilterSecurityInterceptor() throws Exception {
-        FilterSecurityInterceptor interceptor = new FilterSecurityInterceptor();
+        PermitAllFilter interceptor = new PermitAllFilter(new String[]{"/", "/login", "/users/**","/denied", "/css/**", "/images/**", "/js/**"});
         interceptor.setSecurityMetadataSource(urlFilterInvocationSecurityMetadataSource());
         interceptor.setAuthenticationManager(authenticationManagerBean());//인증관리자; 인가 전 인증객체를 갖고 있는 사용자인지 확인
         interceptor.setAccessDecisionManager(affirmativeBased());//인가승인을 할것인지 결정하는 Manager(Voter 들의 승인을 취합하여 결정)
