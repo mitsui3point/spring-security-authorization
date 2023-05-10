@@ -18,14 +18,13 @@ import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.access.annotation.Jsr250MethodSecurityMetadataSource;
 import org.springframework.security.access.annotation.SecuredAnnotationSecurityMetadataSource;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.access.intercept.AbstractSecurityInterceptor;
 import org.springframework.security.access.method.MapBasedMethodSecurityMetadataSource;
 import org.springframework.security.access.method.MethodSecurityMetadataSource;
 import org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource;
-import org.springframework.security.access.vote.AffirmativeBased;
-import org.springframework.security.access.vote.ConsensusBased;
-import org.springframework.security.access.vote.RoleVoter;
-import org.springframework.security.access.vote.UnanimousBased;
+import org.springframework.security.access.vote.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -46,7 +45,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -219,15 +218,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public AccessDecisionManager affirmativeBased() {
-        return new AffirmativeBased(getDecisionVoter());
+        return new AffirmativeBased(getAccessDecisionVoters());
     }
 
     /**
-     * 여러가지 voter 가 존재하지만, {@link RoleVoter} 만 사용한다.
+     * 기존 RoleVoter 한가지{@link RoleVoter}만 설정했지만,
+     * 현재는
+     * {@link RoleHierarchyImpl} implements {@link RoleHierarchy}
+     * 를 사용한다.
+     *
      * @return
      */
-    private List<AccessDecisionVoter<?>> getDecisionVoter() {
-        return Arrays.asList(new RoleVoter());
+    private List<AccessDecisionVoter<?>> getAccessDecisionVoters() {
+        List<AccessDecisionVoter<? extends Object>> accessDecisionVoters = new ArrayList<>();
+        accessDecisionVoters.add(accessDecisionVoter());
+        return accessDecisionVoters;
+//        return Arrays.asList(new RoleVoter());
+    }
+
+    @Bean
+    public AccessDecisionVoter<? extends Object> accessDecisionVoter() {
+        return new RoleHierarchyVoter(roleHierarchy());
+    }
+
+    @Bean
+    public RoleHierarchyImpl roleHierarchy() {
+        return new RoleHierarchyImpl();
     }
 
     @Bean

@@ -33,6 +33,9 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	// H2 내장 데이터베이스 의존성 추가
+	testImplementation 'com.h2database:h2:1.4.200'
 }
 
 tasks.named('test') {

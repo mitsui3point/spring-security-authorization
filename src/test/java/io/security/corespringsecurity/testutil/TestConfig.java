@@ -1,8 +1,10 @@
 package io.security.corespringsecurity.testutil;
 
+import io.security.corespringsecurity.domain.RoleHierarchy;
 import io.security.corespringsecurity.domain.entity.Resources;
 import io.security.corespringsecurity.domain.entity.Role;
 import io.security.corespringsecurity.repository.ResourcesRepository;
+import io.security.corespringsecurity.repository.RoleHierarchyRepository;
 import io.security.corespringsecurity.repository.RoleRepository;
 import io.security.corespringsecurity.repository.UserRepository;
 import io.security.corespringsecurity.service.ResourcesService;
@@ -24,22 +26,20 @@ import java.util.List;
 @ComponentScan(
         basePackages = {
                 "io.security.corespringsecurity.security",
-                "io.security.corespringsecurity.configs"})
+                "io.security.corespringsecurity.configs",
+                "io.security.corespringsecurity.service"})
 public class TestConfig {
     @MockBean
     UserRepository userRepository;
-    @MockBean
-    UserService userService;
 
     @MockBean
     ResourcesRepository resourcesRepository;
-    @MockBean
-    ResourcesService resourcesService;
 
     @MockBean
     RoleRepository roleRepository;
+
     @MockBean
-    RoleService roleService;
+    RoleHierarchyRepository roleHierarchyRepository;
 
     public static List<Resources> getAdminResources() {
         HashSet<Role> adminRoles = new HashSet<>();
@@ -100,5 +100,51 @@ public class TestConfig {
         resourcesList.add(getMypageResources());
         resourcesList.add(getMessagesResources());
         return resourcesList;
+    }
+
+    public static RoleHierarchy getRoleAdminHierarchy(RoleHierarchy parentName) {
+        RoleHierarchy roleAdmin = RoleHierarchy.builder()
+                .id(1L)
+                .childName("ROLE_ADMIN")
+                .parentName(parentName)
+                .build();
+        return roleAdmin;
+    }
+    public static RoleHierarchy getRoleManagerHierarchy(RoleHierarchy parentName) {
+        RoleHierarchy roleManager = RoleHierarchy.builder()
+                .id(2L)
+                .childName("ROLE_MANAGER")
+                .parentName(parentName)
+                .build();
+        return roleManager;
+    }
+    public static RoleHierarchy getRoleUserHierarchy(RoleHierarchy parentName) {
+        RoleHierarchy roleUser = RoleHierarchy.builder()
+                .id(3L)
+                .childName("ROLE_USER")
+                .parentName(parentName)
+                .build();
+        return roleUser;
+    }
+    public static RoleHierarchy getSaveRoleAdminHierarchy(RoleHierarchy parentName) {
+        RoleHierarchy roleAdmin = RoleHierarchy.builder()
+                .childName("ROLE_ADMIN")
+                .parentName(parentName)
+                .build();
+        return roleAdmin;
+    }
+    public static RoleHierarchy getSaveRoleManagerHierarchy(RoleHierarchy parentName) {
+        RoleHierarchy roleManager = RoleHierarchy.builder()
+                .childName("ROLE_MANAGER")
+                .parentName(parentName)
+                .build();
+        return roleManager;
+    }
+    public static RoleHierarchy getSaveRoleUserHierarchy(RoleHierarchy parentName) {
+        RoleHierarchy roleUser = RoleHierarchy.builder()
+                .childName("ROLE_USER")
+                .parentName(parentName)
+                .build();
+        return roleUser;
     }
 }
