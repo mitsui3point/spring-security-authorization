@@ -54,7 +54,8 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         alreadySetup = true;
     }
 
-    private void createRoleHierarchiesIfNotFound(Role childRole, Role parentRole) {
+    @Transactional
+    public void createRoleHierarchiesIfNotFound(Role childRole, Role parentRole) {
         RoleHierarchy roleHierarchy = roleHierarchyRepository.findByChildName(parentRole.getRoleName());
         if (roleHierarchy == null) {
             roleHierarchy = RoleHierarchy.builder()
@@ -96,7 +97,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
         Role userRole = createRoleIfNotFound("ROLE_USER", "회원");
         roles3.add(userRole);
-        createResourceIfNotFound("/users/**", "", roles3, "url");
+        createResourceIfNotFound("/mypage/**", "", roles3, "url");
         createUserIfNotFound("user", "pass", "user@gmail.com", 30, roles3);
 
         createRoleHierarchiesIfNotFound(managerRole, adminRole);
