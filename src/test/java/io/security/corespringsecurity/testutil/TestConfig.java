@@ -1,12 +1,10 @@
 package io.security.corespringsecurity.testutil;
 
-import io.security.corespringsecurity.domain.RoleHierarchy;
+import io.security.corespringsecurity.domain.entity.AccessIp;
 import io.security.corespringsecurity.domain.entity.Resources;
 import io.security.corespringsecurity.domain.entity.Role;
-import io.security.corespringsecurity.repository.ResourcesRepository;
-import io.security.corespringsecurity.repository.RoleHierarchyRepository;
-import io.security.corespringsecurity.repository.RoleRepository;
-import io.security.corespringsecurity.repository.UserRepository;
+import io.security.corespringsecurity.domain.entity.RoleHierarchy;
+import io.security.corespringsecurity.repository.*;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -41,6 +39,9 @@ public class TestConfig {
 
     @MockBean
     RoleHierarchyRepository roleHierarchyRepository;
+
+    @MockBean
+    AccessIpRepository accessIpRepository;
 
     public static List<Resources> getAdminResources() {
         HashSet<Role> adminRoles = new HashSet<>();
@@ -141,6 +142,12 @@ public class TestConfig {
                 .parentName(parentName)
                 .build();
         return roleUser;
+    }
+
+    public static AccessIp getAccessIp() {
+        return AccessIp.builder()
+                .ipAddress("0:0:0:0:0:0:0:1")
+                .build();
     }
 
 }

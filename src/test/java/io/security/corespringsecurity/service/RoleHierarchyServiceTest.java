@@ -1,6 +1,6 @@
 package io.security.corespringsecurity.service;
 
-import io.security.corespringsecurity.domain.RoleHierarchy;
+import io.security.corespringsecurity.domain.entity.RoleHierarchy;
 import io.security.corespringsecurity.repository.RoleHierarchyRepository;
 import io.security.corespringsecurity.service.impl.RoleHierarchyServiceImpl;
 import io.security.corespringsecurity.testutil.TestConfig;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

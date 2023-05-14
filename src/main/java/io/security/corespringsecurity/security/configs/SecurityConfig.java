@@ -8,6 +8,7 @@ import io.security.corespringsecurity.security.handler.FormAccessDeniedHandler;
 import io.security.corespringsecurity.security.metadatasource.UrlFilterInvocationSecurityMetadataSource;
 import io.security.corespringsecurity.security.provider.AjaxAuthenticationProvider;
 import io.security.corespringsecurity.security.provider.FormAuthenticationProvider;
+import io.security.corespringsecurity.security.voter.IpAddressVoter;
 import io.security.corespringsecurity.service.SecurityResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -216,7 +217,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * {@link UnanimousBased} {@link AccessDecisionVoter} Voter 모두가 승인을 해야 이 클래스가 인가승인처리를 한다.
      * 보편적으로 {@link AffirmativeBased} 를 사용한다.
      */
-    @Bean
+    //@Bean
     public AccessDecisionManager affirmativeBased() {
         return new AffirmativeBased(getAccessDecisionVoters());
     }
@@ -231,13 +232,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     private List<AccessDecisionVoter<?>> getAccessDecisionVoters() {
         List<AccessDecisionVoter<? extends Object>> accessDecisionVoters = new ArrayList<>();
-        accessDecisionVoters.add(accessDecisionVoter());
+        accessDecisionVoters.add(ipAddressVoter());
+        accessDecisionVoters.add(roleHierarchyVoter());
         return accessDecisionVoters;
-//        return Arrays.asList(new RoleVoter());
     }
 
     @Bean
-    public AccessDecisionVoter<? extends Object> accessDecisionVoter() {
+    public IpAddressVoter ipAddressVoter() {
+        return new IpAddressVoter(securityResourceService);
+    }
+
+    @Bean
+    public AccessDecisionVoter<? extends Object> roleHierarchyVoter() {
         return new RoleHierarchyVoter(roleHierarchy());
     }
 

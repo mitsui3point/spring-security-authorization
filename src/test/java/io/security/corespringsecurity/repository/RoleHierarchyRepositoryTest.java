@@ -1,7 +1,6 @@
 package io.security.corespringsecurity.repository;
 
-import io.security.corespringsecurity.domain.RoleHierarchy;
-import io.security.corespringsecurity.testutil.TestConfig;
+import io.security.corespringsecurity.domain.entity.RoleHierarchy;
 import io.security.corespringsecurity.testutil.TestJpaConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

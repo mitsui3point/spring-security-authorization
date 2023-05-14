@@ -1,13 +1,7 @@
 package io.security.corespringsecurity.security.listener;
 
-import io.security.corespringsecurity.domain.RoleHierarchy;
-import io.security.corespringsecurity.domain.entity.Account;
-import io.security.corespringsecurity.domain.entity.Resources;
-import io.security.corespringsecurity.domain.entity.Role;
-import io.security.corespringsecurity.repository.ResourcesRepository;
-import io.security.corespringsecurity.repository.RoleHierarchyRepository;
-import io.security.corespringsecurity.repository.RoleRepository;
-import io.security.corespringsecurity.repository.UserRepository;
+import io.security.corespringsecurity.domain.entity.*;
+import io.security.corespringsecurity.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -16,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,6 +30,9 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
     @Autowired
     private RoleHierarchyRepository roleHierarchyRepository;
+
+    @Autowired
+    private AccessIpRepository accessIpRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -102,6 +100,8 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
         createRoleHierarchiesIfNotFound(managerRole, adminRole);
         createRoleHierarchiesIfNotFound(userRole, managerRole);
+
+        setupAccessIpData();
     }
 
     @Transactional
@@ -149,5 +149,18 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .build();
         }
         return resourcesRepository.save(resources);
+    }
+
+    @Transactional
+    public void setupAccessIpData() {
+        String ipAddress = "0:0:0:0:0:0:0:1";
+//        String ipAddress = "127.0.0.1";
+        Optional<AccessIp> accessIp = accessIpRepository.findByIpAddress(ipAddress);
+        if (!accessIp.isPresent()) {
+            AccessIp newAccessIpData = AccessIp.builder()
+                    .ipAddress(ipAddress)
+                    .build();
+            accessIpRepository.save(newAccessIpData);
+        }
     }
 }

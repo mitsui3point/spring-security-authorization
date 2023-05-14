@@ -1,6 +1,6 @@
 package io.security.corespringsecurity.service.impl;
 
-import io.security.corespringsecurity.domain.RoleHierarchy;
+import io.security.corespringsecurity.domain.entity.RoleHierarchy;
 import io.security.corespringsecurity.repository.RoleHierarchyRepository;
 import io.security.corespringsecurity.service.RoleHierarchyService;
 import lombok.RequiredArgsConstructor;
