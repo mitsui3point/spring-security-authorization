@@ -47,14 +47,12 @@ public class TestConfig {
         HashSet<Role> adminRoles = new HashSet<>();
         adminRoles.add(getAdminRole());
         return Arrays.asList(Resources.builder()
-                        .id(4L)
                         .resourceName("/config/**")
                         .resourceType("url")
                         .orderNum(1)
                         .roleSet(adminRoles)
                         .build(),
                 Resources.builder()
-                        .id(7L)
                         .resourceName("/admin/**")
                         .resourceType("url")
                         .orderNum(4)
@@ -67,7 +65,6 @@ public class TestConfig {
         HashSet<Role> managerRoles = new HashSet<>();
         managerRoles.add(getManagerRole());
         return Resources.builder()
-                .id(5L)
                 .resourceName("/messages/**")
                 .resourceType("url")
                 .orderNum(2)
@@ -79,7 +76,6 @@ public class TestConfig {
         HashSet<Role> userRoles = new HashSet<>();
         userRoles.add(getUserRole());
         return Resources.builder()
-                .id(6L)
                 .resourceName("/mypage/**")
                 .resourceType("url")
                 .orderNum(3)
@@ -89,7 +85,6 @@ public class TestConfig {
 
     public static Role getAdminRole() {
         return Role.builder()
-                .id(1L)
                 .roleName("ROLE_ADMIN")
                 .roleDesc("관리자")
                 .build();
@@ -97,7 +92,6 @@ public class TestConfig {
 
     public static Role getManagerRole() {
         return Role.builder()
-                .id(2L)
                 .roleName("ROLE_MANAGER")
                 .roleDesc("매니저")
                 .build();
@@ -105,7 +99,6 @@ public class TestConfig {
 
     public static Role getUserRole() {
         return Role.builder()
-                .id(3L)
                 .roleName("ROLE_USER")
                 .roleDesc("사용자")
                 .build();
@@ -121,7 +114,6 @@ public class TestConfig {
 
     public static RoleHierarchy getRoleAdminHierarchy(RoleHierarchy parentName) {
         RoleHierarchy roleAdmin = RoleHierarchy.builder()
-                .id(1L)
                 .childName("ROLE_ADMIN")
                 .parentName(parentName)
                 .build();
@@ -129,7 +121,6 @@ public class TestConfig {
     }
     public static RoleHierarchy getRoleManagerHierarchy(RoleHierarchy parentName) {
         RoleHierarchy roleManager = RoleHierarchy.builder()
-                .id(2L)
                 .childName("ROLE_MANAGER")
                 .parentName(parentName)
                 .build();
@@ -137,7 +128,6 @@ public class TestConfig {
     }
     public static RoleHierarchy getRoleUserHierarchy(RoleHierarchy parentName) {
         RoleHierarchy roleUser = RoleHierarchy.builder()
-                .id(3L)
                 .childName("ROLE_USER")
                 .parentName(parentName)
                 .build();

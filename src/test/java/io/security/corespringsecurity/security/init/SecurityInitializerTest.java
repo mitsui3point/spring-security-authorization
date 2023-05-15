@@ -1,13 +1,13 @@
 package io.security.corespringsecurity.security.init;
 
 import io.security.corespringsecurity.repository.RoleHierarchyRepository;
+import io.security.corespringsecurity.testutil.testconfig.WithMockCustomUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -43,7 +43,7 @@ public class SecurityInitializerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/admin", "/config", "/mypage", "/messages"})
-    @WithMockUser(roles = "ADMIN")
+    @WithMockCustomUser(roles = "ADMIN")
     @DisplayName("RoleHierarchy 적용 후 ADMIN 접근허용 URI에 접근 성공한다.")
     void accessAllowAdmin(String uri) throws Exception {
         //when
@@ -54,7 +54,7 @@ public class SecurityInitializerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/mypage", "/messages"})
-    @WithMockUser(roles = "MANAGER")
+    @WithMockCustomUser(roles = "MANAGER")
     @DisplayName("RoleHierarchy 적용 후 MANAGER 접근허용 URI에 접근 성공한다.")
     void accessAllowedManager(String uri) throws Exception {
         //when
@@ -65,7 +65,7 @@ public class SecurityInitializerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/admin", "/config"})
-    @WithMockUser(roles = "MANAGER")
+    @WithMockCustomUser(roles = "MANAGER")
     @DisplayName("RoleHierarchy 적용 후 MANAGER 접근거부 URI에 접근 실패한다.")
     void accessDeniedManager(String uri) throws Exception {
         //when
@@ -76,7 +76,7 @@ public class SecurityInitializerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/mypage"})
-    @WithMockUser(roles = "USER")
+    @WithMockCustomUser(roles = "USER")
     @DisplayName("RoleHierarchy 적용 후 USER 접근가능 URI에 접근 성공한다.")
     void accessAllowUser(String uri) throws Exception {
         //when
@@ -87,7 +87,7 @@ public class SecurityInitializerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/admin", "/config", "/messages"})
-    @WithMockUser(roles = "USER")
+    @WithMockCustomUser(roles = "USER")
     @DisplayName("RoleHierarchy 적용 후 USER 접근거부 URI에 접근 실패한다.")
     void accessDeniedUser(String uri) throws Exception {
         //when

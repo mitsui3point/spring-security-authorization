@@ -2,6 +2,8 @@ package io.security.corespringsecurity.security.filter;
 
 import io.security.corespringsecurity.repository.ResourcesRepository;
 import io.security.corespringsecurity.security.metadatasource.UrlFilterInvocationSecurityMetadataSource;
+import io.security.corespringsecurity.testutil.testconfig.WithAnonymousCustomUser;
+import io.security.corespringsecurity.testutil.testconfig.WithMockCustomUser;
 import io.security.corespringsecurity.service.SecurityResourceService;
 import io.security.corespringsecurity.testutil.TestConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.ConfigAttribute;
@@ -39,6 +40,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -101,14 +103,16 @@ public class PermitAllFilterTest {
     }
 
     @ParameterizedTest
-    @DisplayName("PermitAllFilter 적용 후 인증, 인가가 필요한 페이지들은 접근할 수 없다.")
-    @WithAnonymousUser
+    @DisplayName("PermitAllFilter 적용 후 인증, 인가가 필요한 페이지들은 접근할 수 없다.(로그인 페이지로 REDIRECT)")
+    @WithAnonymousCustomUser
     @ValueSource(strings = {"/mypage", "/config", "/admin", "/messages"})
     void notPermittedPage(String uri) throws Exception {
+
         //when
         mvc.perform(get(uri))
                 .andDo(print())
                 //then
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("http://localhost/login"));
     }
 }

@@ -12,6 +12,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+
 import static io.security.corespringsecurity.testutil.TestConfig.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,8 +37,14 @@ public class RoleHierarchyRepositoryTest {
     @Transactional
     void findByChildName() {
         //given
-        RoleHierarchy roleUser = getRoleUserHierarchy(getRoleManagerHierarchy(getRoleAdminHierarchy(null)));
-        roleHierarchyRepository.save(roleUser);
+        List<RoleHierarchy> roleHierarchies = roleHierarchyRepository.findAll();
+        RoleHierarchy roleUser = roleHierarchies.stream()
+                .filter(o -> o.getChildName().equals("ROLE_USER"))
+                .findFirst().orElseGet(() -> null);
+        if (roleUser == null) {
+            roleUser = getRoleUserHierarchy(getRoleManagerHierarchy(getRoleAdminHierarchy(null)));
+            roleHierarchyRepository.save(roleUser);
+        }
 
         //when
         RoleHierarchy actual = roleHierarchyRepository.findByChildName(roleUser.getChildName());
