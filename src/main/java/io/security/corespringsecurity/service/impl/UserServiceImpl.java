@@ -9,6 +9,7 @@ import io.security.corespringsecurity.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void createUser(Account account){
+    public void createUser(Account account) {
 
         Role role = roleRepository.findByRoleName("ROLE_USER");
         Set<Role> roles = new HashSet<>();
@@ -45,12 +46,12 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void modifyUser(AccountDto accountDto){
+    public void modifyUser(AccountDto accountDto) {
 
         ModelMapper modelMapper = new ModelMapper();
         Account account = modelMapper.map(accountDto, Account.class);
 
-        if(accountDto.getRoles() != null){
+        if (accountDto.getRoles() != null) {
             Set<Role> roles = new HashSet<>();
             accountDto.getRoles().forEach(role -> {
                 Role r = roleRepository.findByRoleName(role);
@@ -88,4 +89,8 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
+
+    @Override
+    @Secured("ROLE_USER")
+    public void order() {}
 }
